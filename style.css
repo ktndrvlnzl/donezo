@@ -1,0 +1,54 @@
+body {
+  font-family: sans-serif;
+  background-color: #FDF6F0; /* cream */
+  color: #2D1B2E; /* dark plum */
+  padding: 20px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-mode {
+  background-color: #241726;
+  color: #F7ECF2;
+}
+
+h1 {
+  color: #E39BB8; /* dusty pink */
+}
+
+button {
+  background-color: #E39BB8;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+button:hover {
+  background-color: #D5809F;
+}
+
+input, select {
+  padding: 5px;
+  border: 1px solid #C3B1E1; /* lavender */
+  border-radius: 4px;
+}
+
+#task-list div, #history-list div {
+  background-color: white;
+  border: 1px solid #F0DCE6;
+  border-radius: 8px;
+  padding: 8px;
+  margin-bottom: 6px;
+}
+
+body.dark-mode #task-list div, body.dark-mode #history-list div {
+  background-color: #331F35;
+  border-color: #4A2E4D;
+}
+
+#progress-text {
+  font-weight: bold;
+  color: #8FAE8B; /* muted green, for the completed feel */
+}
