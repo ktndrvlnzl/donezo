@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Donezo</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Donezo</h1>
+  <p>Get it done!</p>
+
+  <button id="dark-mode-btn">Toggle Dark Mode</button>
+  <button id="calendar-toggle-btn">Show Calendar View</button>
+
+  <p id="progress-text"></p>
+
+  <form id="task-form">
+    <input type="text" id="title-input" placeholder="Task title" required>
+    <input type="date" id="date-input">
+    <select id="priority-input">
+      <option value="high">High</option>
+      <option value="medium" selected>Medium</option>
+      <option value="low">Low</option>
+    </select>
+    <input type="text" id="category-input" placeholder="Category">
+    <select id="recurring-input">
+      <option value="none" selected>Does not repeat</option>
+      <option value="daily">Daily</option>
+      <option value="weekly">Weekly</option>
+      <option value="monthly">Monthly</option>
+    </select>
+    <button type="submit">Add Task</button>
+  </form>
+
+  <input type="text" id="search-input" placeholder="Search tasks...">
+  <select id="filter-input">
+    <option value="all">All Categories</option>
+  </select>
+  <button id="sort-btn">Sort by Deadline</button>
+
+  <div id="calendar"></div>
+
+  <div id="task-list"></div>
+
+  <button id="history-toggle-btn">Show Completed History</button>
+  <div id="history-list"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
