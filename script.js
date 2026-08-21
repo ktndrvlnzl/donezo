@@ -145,8 +145,10 @@ function renderHistory() {
   completedTasks.forEach(function(task) {
     const index = tasks.indexOf(task);
     const taskDiv = document.createElement("div");
+    taskDiv.className = "task-card";
 
     const titleSpan = document.createElement("span");
+    titleSpan.className = "task-title";
     titleSpan.textContent = task.title;
     titleSpan.style.textDecoration = "line-through";
 
@@ -296,6 +298,7 @@ function renderTasks() {
   visibleTasks.forEach(function(task) {
     const index = tasks.indexOf(task); // find its real position in the full list
     const taskDiv = document.createElement("div");
+    taskDiv.className = "task-card";
 
     // drag & drop only makes sense in the plain, unsorted view
     if (!sortByDeadline) {
@@ -334,14 +337,38 @@ function renderTasks() {
       taskDiv.appendChild(saveBtn);
     } else {
       const titleSpan = document.createElement("span");
+      titleSpan.className = "task-title";
       titleSpan.textContent = task.title;
 
-      const detailsSpan = document.createElement("span");
-      let detailsText = " | Due: " + task.dueDate + " | " + task.priority.toUpperCase() + " | " + task.category;
-      if (task.recurring !== "none") {
-        detailsText += " | Repeats: " + task.recurring;
+      // badges row: due date, priority, category, recurring
+      const badgeRow = document.createElement("div");
+      badgeRow.className = "badge-row";
+
+      if (task.dueDate) {
+        const dueBadge = document.createElement("span");
+        dueBadge.className = "badge badge-due";
+        dueBadge.textContent = "Due: " + task.dueDate;
+        badgeRow.appendChild(dueBadge);
       }
-      detailsSpan.textContent = detailsText;
+
+      const priorityBadge = document.createElement("span");
+      priorityBadge.className = "badge badge-priority-" + task.priority; // e.g. badge-priority-high
+      priorityBadge.textContent = task.priority.toUpperCase();
+      badgeRow.appendChild(priorityBadge);
+
+      if (task.category) {
+        const categoryBadge = document.createElement("span");
+        categoryBadge.className = "badge badge-category";
+        categoryBadge.textContent = task.category;
+        badgeRow.appendChild(categoryBadge);
+      }
+
+      if (task.recurring !== "none") {
+        const recurringBadge = document.createElement("span");
+        recurringBadge.className = "badge badge-recurring";
+        recurringBadge.textContent = "Repeats: " + task.recurring;
+        badgeRow.appendChild(recurringBadge);
+      }
 
       const completeBtn = document.createElement("button");
       completeBtn.textContent = "Complete";
@@ -361,11 +388,15 @@ function renderTasks() {
         deleteTask(index);
       };
 
+      const buttonRow = document.createElement("div");
+      buttonRow.style.marginTop = "8px";
+      buttonRow.appendChild(completeBtn);
+      buttonRow.appendChild(editBtn);
+      buttonRow.appendChild(deleteBtn);
+
       taskDiv.appendChild(titleSpan);
-      taskDiv.appendChild(detailsSpan);
-      taskDiv.appendChild(completeBtn);
-      taskDiv.appendChild(editBtn);
-      taskDiv.appendChild(deleteBtn);
+      taskDiv.appendChild(badgeRow);
+      taskDiv.appendChild(buttonRow);
     }
 
     container.appendChild(taskDiv);
