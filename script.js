@@ -1,11 +1,11 @@
-// this will hold all our tasks — starts empty
-let tasks = [];
+// load saved tasks from this browser, or start empty if there are none
+let tasks = JSON.parse(localStorage.getItem("donezo-tasks")) || [];
 let sortByDeadline = false;
 let historyVisible = false;
-let dragStartIndex = null; // remembers which task we picked up
+let dragStartIndex = null;
 let calendarVisible = false;
-let calendarDate = new Date(); // tracks which month the calendar is showing
-let selectedDay = null; // "YYYY-MM-DD" of the day clicked, or null
+let calendarDate = new Date();
+let selectedDay = null;
 
 const form = document.getElementById("task-form");
 const searchInput = document.getElementById("search-input");
@@ -17,9 +17,36 @@ const historyList = document.getElementById("history-list");
 const darkModeBtn = document.getElementById("dark-mode-btn");
 const calendarToggleBtn = document.getElementById("calendar-toggle-btn");
 const calendarDiv = document.getElementById("calendar");
+const nameInput = document.getElementById("name-input");
+const greetingWord = document.getElementById("greeting-word");
+
+function saveTasks() {
+  localStorage.setItem("donezo-tasks", JSON.stringify(tasks));
+}
+
+// ---- name + greeting ----
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+greetingWord.textContent = getGreeting() + ",";
+nameInput.value = localStorage.getItem("donezo-name") || "";
+
+nameInput.addEventListener("input", function() {
+  localStorage.setItem("donezo-name", nameInput.value);
+});
+
+// ---- dark mode (also remembered between visits) ----
+if (localStorage.getItem("donezo-dark-mode") === "true") {
+  document.body.classList.add("dark-mode");
+}
 
 darkModeBtn.addEventListener("click", function() {
   document.body.classList.toggle("dark-mode");
+  localStorage.setItem("donezo-dark-mode", document.body.classList.contains("dark-mode"));
 });
 
 calendarToggleBtn.addEventListener("click", function() {
@@ -28,7 +55,7 @@ calendarToggleBtn.addEventListener("click", function() {
 });
 
 form.addEventListener("submit", function(event) {
-  event.preventDefault(); // stops the page from refreshing
+  event.preventDefault();
 
   const titleInput = document.getElementById("title-input");
   const dateInput = document.getElementById("date-input");
@@ -46,17 +73,16 @@ form.addEventListener("submit", function(event) {
     editing: false
   };
 
-  tasks.push(newTask); // just like .append() in Python!
+  tasks.push(newTask);
 
   titleInput.value = "";
   dateInput.value = "";
   categoryInput.value = "";
   recurringInput.value = "none";
   updateCategoryOptions();
-  renderTasks(); // re-draw the list with the new task included
+  renderTasks();
 });
 
-// re-run renderTasks() whenever the search box or filter dropdown changes
 searchInput.addEventListener("input", renderTasks);
 filterInput.addEventListener("change", renderTasks);
 
@@ -71,7 +97,6 @@ historyToggleBtn.addEventListener("click", function() {
 });
 
 function updateCategoryOptions() {
-  // build a list of unique categories, like using set() in Python
   const uniqueCategories = [...new Set(tasks.map(function(t) { return t.category; }))];
 
   filterInput.innerHTML = '<option value="all">All Categories</option>';
@@ -89,7 +114,6 @@ function getVisibleTasks() {
   const searchTerm = searchInput.value.toLowerCase();
   const selectedCategory = filterInput.value;
 
-  // only ACTIVE (not completed) tasks show in the main list now
   let visible = tasks.filter(function(task) {
     const matchesSearch = task.title.toLowerCase().includes(searchTerm);
     const matchesCategory = selectedCategory === "all" || task.category === selectedCategory;
@@ -152,6 +176,9 @@ function renderHistory() {
     titleSpan.textContent = task.title;
     titleSpan.style.textDecoration = "line-through";
 
+    const buttonRow = document.createElement("div");
+    buttonRow.className = "button-row";
+
     const undoBtn = document.createElement("button");
     undoBtn.textContent = "Undo";
     undoBtn.onclick = function() {
@@ -164,15 +191,16 @@ function renderHistory() {
       deleteTask(index);
     };
 
+    buttonRow.appendChild(undoBtn);
+    buttonRow.appendChild(deleteBtn);
     taskDiv.appendChild(titleSpan);
-    taskDiv.appendChild(undoBtn);
-    taskDiv.appendChild(deleteBtn);
+    taskDiv.appendChild(buttonRow);
     historyList.appendChild(taskDiv);
   });
 }
 
 function renderCalendar() {
-  calendarToggleBtn.textContent = calendarVisible ? "Hide Calendar View" : "Show Calendar View";
+  calendarToggleBtn.textContent = calendarVisible ? "📅 Hide Calendar" : "📅 Calendar";
 
   if (!calendarVisible) {
     calendarDiv.innerHTML = "";
@@ -180,12 +208,12 @@ function renderCalendar() {
   }
 
   const year = calendarDate.getFullYear();
-  const month = calendarDate.getMonth(); // 0 = January, 11 = December
+  const month = calendarDate.getMonth();
 
   calendarDiv.innerHTML = "";
 
-  // month navigation header
   const header = document.createElement("div");
+  header.className = "button-row";
 
   const prevBtn = document.createElement("button");
   prevBtn.textContent = "< Prev";
@@ -211,7 +239,6 @@ function renderCalendar() {
   header.appendChild(nextBtn);
   calendarDiv.appendChild(header);
 
-  // group active tasks by their due date, e.g. { "2026-08-20": [task1, task2] }
   const tasksByDay = {};
   tasks.forEach(function(task) {
     if (task.dueDate && !task.completed) {
@@ -226,11 +253,11 @@ function renderCalendar() {
   grid.style.display = "grid";
   grid.style.gridTemplateColumns = "repeat(7, 1fr)";
   grid.style.gap = "4px";
+  grid.style.marginBottom = "16px";
 
-  const firstDayOfMonth = new Date(year, month, 1).getDay(); // 0 = Sunday
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // blank cells before day 1, so it lines up under the right weekday
   for (let i = 0; i < firstDayOfMonth; i++) {
     grid.appendChild(document.createElement("div"));
   }
@@ -244,11 +271,13 @@ function renderCalendar() {
     cell.style.border = "1px solid #C3B1E1";
     cell.style.borderRadius = "6px";
     cell.style.padding = "4px";
-    cell.style.minHeight = "50px";
+    cell.style.minHeight = "44px";
     cell.style.cursor = "pointer";
+    cell.style.fontSize = "12px";
 
     if (iso === selectedDay) {
-      cell.style.backgroundColor = "#E39BB8"; // highlight selected day
+      cell.style.backgroundColor = "#E39BB8";
+      cell.style.color = "white";
     }
 
     const dayNumber = document.createElement("div");
@@ -256,21 +285,24 @@ function renderCalendar() {
     cell.appendChild(dayNumber);
 
     const dayTasks = tasksByDay[iso] || [];
-    dayTasks.slice(0, 2).forEach(function(task) {
+    dayTasks.slice(0, 1).forEach(function(task) {
       const taskLine = document.createElement("div");
       taskLine.textContent = task.title;
-      taskLine.style.fontSize = "11px";
+      taskLine.style.fontSize = "10px";
+      taskLine.style.overflow = "hidden";
+      taskLine.style.textOverflow = "ellipsis";
+      taskLine.style.whiteSpace = "nowrap";
       cell.appendChild(taskLine);
     });
-    if (dayTasks.length > 2) {
+    if (dayTasks.length > 1) {
       const moreLine = document.createElement("div");
-      moreLine.textContent = "+" + (dayTasks.length - 2) + " more";
-      moreLine.style.fontSize = "11px";
+      moreLine.textContent = "+" + (dayTasks.length - 1) + " more";
+      moreLine.style.fontSize = "10px";
       cell.appendChild(moreLine);
     }
 
     cell.onclick = function() {
-      selectedDay = (selectedDay === iso) ? null : iso; // clicking again clears it
+      selectedDay = (selectedDay === iso) ? null : iso;
       renderTasks();
     };
 
@@ -281,8 +313,10 @@ function renderCalendar() {
 }
 
 function renderTasks() {
+  saveTasks(); // keep localStorage in sync every time the list changes
+
   const container = document.getElementById("task-list");
-  container.innerHTML = ""; // clear it out first
+  container.innerHTML = "";
 
   updateProgress();
   renderHistory();
@@ -296,11 +330,10 @@ function renderTasks() {
   }
 
   visibleTasks.forEach(function(task) {
-    const index = tasks.indexOf(task); // find its real position in the full list
+    const index = tasks.indexOf(task);
     const taskDiv = document.createElement("div");
     taskDiv.className = "task-card";
 
-    // drag & drop only makes sense in the plain, unsorted view
     if (!sortByDeadline) {
       taskDiv.draggable = true;
 
@@ -314,7 +347,7 @@ function renderTasks() {
       });
 
       taskDiv.addEventListener("dragover", function(event) {
-        event.preventDefault(); // required to allow dropping
+        event.preventDefault();
       });
 
       taskDiv.addEventListener("drop", function() {
@@ -340,7 +373,6 @@ function renderTasks() {
       titleSpan.className = "task-title";
       titleSpan.textContent = task.title;
 
-      // badges row: due date, priority, category, recurring
       const badgeRow = document.createElement("div");
       badgeRow.className = "badge-row";
 
@@ -352,7 +384,7 @@ function renderTasks() {
       }
 
       const priorityBadge = document.createElement("span");
-      priorityBadge.className = "badge badge-priority-" + task.priority; // e.g. badge-priority-high
+      priorityBadge.className = "badge badge-priority-" + task.priority;
       priorityBadge.textContent = task.priority.toUpperCase();
       badgeRow.appendChild(priorityBadge);
 
@@ -369,6 +401,9 @@ function renderTasks() {
         recurringBadge.textContent = "Repeats: " + task.recurring;
         badgeRow.appendChild(recurringBadge);
       }
+
+      const buttonRow = document.createElement("div");
+      buttonRow.className = "button-row";
 
       const completeBtn = document.createElement("button");
       completeBtn.textContent = "Complete";
@@ -388,8 +423,6 @@ function renderTasks() {
         deleteTask(index);
       };
 
-      const buttonRow = document.createElement("div");
-      buttonRow.style.marginTop = "8px";
       buttonRow.appendChild(completeBtn);
       buttonRow.appendChild(editBtn);
       buttonRow.appendChild(deleteBtn);
@@ -405,14 +438,14 @@ function renderTasks() {
 
 function reorderTasks(fromIndex, toIndex) {
   if (fromIndex === null || fromIndex === toIndex) return;
-  const [movedTask] = tasks.splice(fromIndex, 1); // remove it from its old spot
-  tasks.splice(toIndex, 0, movedTask); // insert it at the new spot
+  const [movedTask] = tasks.splice(fromIndex, 1);
+  tasks.splice(toIndex, 0, movedTask);
   dragStartIndex = null;
   renderTasks();
 }
 
 function getNextDueDate(dueDate, recurring) {
-  if (!dueDate) return dueDate; // no date to push forward
+  if (!dueDate) return dueDate;
 
   const date = new Date(dueDate + "T00:00:00");
 
@@ -462,8 +495,9 @@ function saveEdit(index, newTitle) {
 }
 
 function deleteTask(index) {
-  tasks.splice(index, 1); // removes 1 item at that position
+  tasks.splice(index, 1);
   renderTasks();
 }
 
+updateCategoryOptions();
 renderTasks();
