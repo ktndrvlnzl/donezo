@@ -2,47 +2,68 @@
 <html>
 <head>
   <title>Donezo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Donezo</h1>
-  <p>Get it done!</p>
+  <div class="container">
 
-  <button id="dark-mode-btn">Toggle Dark Mode</button>
-  <button id="calendar-toggle-btn">Show Calendar View</button>
+    <div class="top-bar">
+      <div>
+        <h1>Donezo</h1>
+        <p class="tagline">Get it done!</p>
+      </div>
+      <div class="top-buttons">
+        <button id="dark-mode-btn">🌙</button>
+        <button id="calendar-toggle-btn">📅 Calendar</button>
+      </div>
+    </div>
 
-  <p id="progress-text"></p>
+    <p class="greeting-line">
+      <span id="greeting-word"></span>
+      <input type="text" id="name-input" placeholder="(Put your name here.)">
+    </p>
 
-  <form id="task-form">
-    <input type="text" id="title-input" placeholder="Task title" required>
-    <input type="date" id="date-input">
-    <select id="priority-input">
-      <option value="high">High</option>
-      <option value="medium" selected>Medium</option>
-      <option value="low">Low</option>
-    </select>
-    <input type="text" id="category-input" placeholder="Category">
-    <select id="recurring-input">
-      <option value="none" selected>Does not repeat</option>
-      <option value="daily">Daily</option>
-      <option value="weekly">Weekly</option>
-      <option value="monthly">Monthly</option>
-    </select>
-    <button type="submit">Add Task</button>
-  </form>
+    <p id="progress-text"></p>
 
-  <input type="text" id="search-input" placeholder="Search tasks...">
-  <select id="filter-input">
-    <option value="all">All Categories</option>
-  </select>
-  <button id="sort-btn">Sort by Deadline</button>
+    <form id="task-form" class="task-form">
+      <input type="text" id="title-input" placeholder="Task title" required>
+      <div class="form-row">
+        <input type="date" id="date-input">
+        <select id="priority-input">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <input type="text" id="category-input" placeholder="Category">
+        <select id="recurring-input">
+          <option value="none" selected>Does not repeat</option>
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+        </select>
+      </div>
+      <button type="submit" class="add-btn">Add Task</button>
+    </form>
 
-  <div id="calendar"></div>
+    <div class="controls-row">
+      <input type="text" id="search-input" placeholder="Search tasks...">
+      <select id="filter-input">
+        <option value="all">All Categories</option>
+      </select>
+      <button id="sort-btn">Sort by Deadline</button>
+    </div>
 
-  <div id="task-list"></div>
+    <div id="calendar"></div>
 
-  <button id="history-toggle-btn">Show Completed History</button>
-  <div id="history-list"></div>
+    <div id="task-list"></div>
+
+    <button id="history-toggle-btn">Show Completed History</button>
+    <div id="history-list"></div>
+
+  </div>
 
   <script src="script.js"></script>
 </body>
